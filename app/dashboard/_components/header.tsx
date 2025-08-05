@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useQuery } from "@tanstack/react-query"
+import Link from "next/link"
 
 interface UserProfile {
   name?: string
@@ -77,6 +78,7 @@ export function DashboardHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+              <Link href="/dashboard/settings" className="relative h-8 w-8 rounded-full p-0">
               <Avatar className="h-8 w-8">
                 {userAvatar ? (
                   <AvatarImage src={userAvatar} alt={userName} />
@@ -84,6 +86,7 @@ export function DashboardHeader() {
                   <AvatarFallback>{userInitial}</AvatarFallback>
                 )}
               </Avatar>
+              </Link>
             </Button>
           </DropdownMenuTrigger>
         </DropdownMenu>

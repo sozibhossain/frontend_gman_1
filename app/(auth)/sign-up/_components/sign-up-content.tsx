@@ -1,9 +1,8 @@
 "use client";
-
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
 
 export default function RegisterContent() {
   const [showPassword, setShowPassword] = useState(false);
@@ -84,7 +82,7 @@ export default function RegisterContent() {
         }),
       };
 
-      // Make API call to your backend
+      // Step 1: Register the user
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
         {
@@ -101,16 +99,31 @@ export default function RegisterContent() {
       if (response.ok) {
         toast.success("Registration successful!");
 
+        // Store seller ID if needed
         if (data.data?._id && userType === "seller") {
           document.cookie = `sellerRegisterId=${
             data.data._id
           }; path=/; max-age=${60 * 60 * 24}`;
         }
 
-        if (userType === "seller") {
-          router.push("/seller");
-        } else {
+        // Step 2: Automatically sign in the user using NextAuth
+        const signInResult = await signIn("credentials", {
+          email: formData.email,
+          password: formData.password,
+          redirect: false, // Don't redirect automatically
+        });
+
+        if (signInResult?.error) {
+          toast.error(
+            "Registration successful, but auto-login failed. Please sign in manually."
+          );
           router.push("/login");
+        } else {
+          toast.success("Welcome! You're now logged in.");
+          // Redirect based on user type
+          if (userType === "seller") {
+            router.push("/seller");
+          }
         }
       } else {
         toast.error(data.message || "Registration failed");
@@ -130,22 +143,17 @@ export default function RegisterContent() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: "url('/asset/authentication.jpg')",
+            backgroundImage: "url('/placeholder.svg?height=800&width=600')",
           }}
         >
           <div className="absolute inset-0 bg-black/40" />
         </div>
-
         <div className="container relative z-10 flex flex-col justify-center items-center p-12 text-white">
           <div className="mb-8 backdrop-blur-[50px] bg-white/23 shadow-[0px_4px_4px_0px_rgba(93,93,93,0.25)] p-5 rounded-[16px]">
             <div className="flex items-start gap-2">
-              <Image
-                src="/asset/logo.png"
-                width={40}
-                height={53}
-                alt="Table Fresh Logo"
-                className="h-[53px] w-[40px]"
-              />
+              <div className="h-[53px] w-[40px] bg-green-600 rounded flex items-center justify-center">
+                <span className="text-white font-bold text-xl">T</span>
+              </div>
               <div className="flex flex-col">
                 <div className="">
                   <p className="text-[16px] font-semibold text-black">TABLE</p>
@@ -159,7 +167,6 @@ export default function RegisterContent() {
               </div>
             </div>
           </div>
-
           <h1 className="text-4xl font-bold mb-4">Welcome to Table Fresh</h1>
           <p className="text-lg opacity-90">
             Discover fresh, local produce from farms around the world
@@ -168,7 +175,7 @@ export default function RegisterContent() {
       </div>
 
       {/* Right side - Registration Form */}
-      <div className=" w-full lg:w-1/2 flex items-start justify-center p-8 relative">
+      <div className="w-full lg:w-1/2 flex items-start justify-center p-8 relative">
         <div className="absolute top-4 left-4">
           <Link href="/">
             <ArrowLeft />
@@ -177,7 +184,7 @@ export default function RegisterContent() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <div className="">
-              <h2 className="text-3xl font-bold text-gray-900 ">
+              <h2 className="text-3xl font-bold text-gray-900">
                 Create Your Account
               </h2>
             </div>
@@ -206,17 +213,6 @@ export default function RegisterContent() {
                   <Label htmlFor="buyer">Join as a Buyer</Label>
                 </div>
               </RadioGroup>
-
-              {/* {userType === "seller" && (
-                <div className="mt-2">
-                  <Link
-                    href="/become-seller/info"
-                    className="text-sm text-green-600 hover:text-green-500"
-                  >
-                    Who should sign up to sell?
-                  </Link>
-                </div>
-              )} */}
             </div>
 
             {/* Name */}
@@ -295,7 +291,6 @@ export default function RegisterContent() {
                     />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">City</Label>

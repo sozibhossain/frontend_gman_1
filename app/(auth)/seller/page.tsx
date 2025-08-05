@@ -170,6 +170,7 @@ export default function SellerPage() {
       toast.error("An error occurred while setting up your farm profile");
     } finally {
       setIsLoading(false);
+      router.push("/dashboard");
     }
   };
 
@@ -333,8 +334,8 @@ export default function SellerPage() {
               isOpen={isMapOpen}
               onClose={() => setIsMapOpen(false)}
               onLocationSelect={handleLocationSelect}
-              initialLat={latitude || 34.0522}
-              initialLng={longitude || -118.2437}
+              initialLat={latitude ?? null}
+              initialLng={longitude ?? null}
             />
           )}
         </div>

@@ -1,6 +1,12 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents, Tooltip } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  Tooltip,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Button } from "@/components/ui/button";
@@ -16,30 +22,51 @@ import {
 interface MapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLocationSelect: (lat: number, lng: number, placeName: string | null) => void;
-  initialLat: number;
-  initialLng: number;
+  onLocationSelect: (
+    lat: number,
+    lng: number,
+    placeName: string | null
+  ) => void;
+  initialLat: number | null; // <- allow null
+  initialLng: number | null; // <- allow null
 }
 
-export default function MapModal({ isOpen, onClose, onLocationSelect, initialLat, initialLng }: MapModalProps) {
-  const [selectedPosition, setSelectedPosition] = useState<[number, number] | null>(
-    initialLat && initialLng ? [initialLat, initialLng] : null
-  );
+interface IconDefaultWithPrivate extends L.Icon.Default {
+  _getIconUrl?: () => string;
+}
+
+// Default coordinates that show the entire USA
+const USA_CENTER = [37.8, -96] as [number, number];
+const USA_ZOOM = 4;
+
+export default function MapModal({
+  isOpen,
+  onClose,
+  onLocationSelect,
+  initialLat,
+  initialLng,
+}: MapModalProps) {
+  const [selectedPosition, setSelectedPosition] = useState<
+    [number, number] | null
+  >(null); // Start with null to ensure USA view on first load
   const [placeName, setPlaceName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Fix for default Leaflet icon issues with Webpack (runs only on client side)
+
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      delete (L.Icon.Default.prototype as IconDefaultWithPrivate)._getIconUrl;
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+        iconRetinaUrl:
+          "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
         iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+        shadowUrl:
+          "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
       });
     }
-  }, []); // Empty dependency array to run once on mount
+  }, []);
 
   // Fetch place name using Nominatim API
   const fetchPlaceName = async (lat: number, lng: number) => {
@@ -78,11 +105,14 @@ export default function MapModal({ isOpen, onClose, onLocationSelect, initialLat
     return () => clearTimeout(timer);
   }, [selectedPosition]);
 
-  // Reset selected position when modal opens
+  // Set initial marker position when modal opens, but don't affect map center/zoom
   useEffect(() => {
     if (isOpen) {
       setSelectedPosition(
-        initialLat !== undefined && initialLng !== undefined && initialLat !== null && initialLng !== null
+        initialLat !== undefined &&
+          initialLng !== undefined &&
+          initialLat !== null &&
+          initialLng !== null
           ? [initialLat, initialLng]
           : null
       );
@@ -117,14 +147,16 @@ export default function MapModal({ isOpen, onClose, onLocationSelect, initialLat
       <DialogContent className="sm:max-w-[1000px] p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>Select Farm Location</DialogTitle>
-          <DialogDescription>Click on the map to select your farm&lsquo;s location.</DialogDescription>
+          <DialogDescription>
+            Click on the map to select your farm&lsquo;s location.
+          </DialogDescription>
         </DialogHeader>
         <div className="p-6 pt-0">
           <div className="h-[400px] w-full rounded-md overflow-hidden">
             {isOpen && (
               <MapContainer
-                center={selectedPosition || [initialLat, initialLng]}
-                zoom={13}
+                center={selectedPosition || USA_CENTER} // Use selectedPosition if available, else USA_CENTER
+                zoom={selectedPosition ? 13 : USA_ZOOM} // Zoom in if position selected, else USA_ZOOM
                 scrollWheelZoom={true}
                 className="h-full w-full"
               >
@@ -146,7 +178,12 @@ export default function MapModal({ isOpen, onClose, onLocationSelect, initialLat
           >
             Confirm Location
           </Button>
-          <Button type="button" variant="outline" className="bg-black text-white" onClick={onClose}>
+          <Button
+            type="button"
+            variant="outline"
+            className="bg-black text-white"
+            onClick={onClose}
+          >
             Cancel
           </Button>
         </DialogFooter>
