@@ -317,6 +317,7 @@ export default function BuyerProfile() {
 
   const farmId = profile?.farm;
 
+
   const handleEditClick = () => {
     if (!isEditing && profile) {
       setFormData({

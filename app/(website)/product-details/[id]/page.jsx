@@ -127,7 +127,6 @@ async function addToCart({ productId, quantity, token }) {
 
   const product = data?.data;
 
-  console.log("POOOOOOO", product)
 
   // Set farmId when product changes
   useEffect(() => {

@@ -31,7 +31,7 @@ const sidebarItems = [
   },
   {
     id: "active-products",
-    label: "Add Product",
+    label: "My Products",
     icon: Package,
     href: "/dashboard/active-product",
   },

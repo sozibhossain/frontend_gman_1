@@ -26,7 +26,6 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 
 // Constants
-const API_BASE_URL = "https://gman54-backend.onrender.com/api/v1";
 const MAX_IMAGES = 5;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -96,7 +95,7 @@ const fetchFarmData = async (
   token: string
 ): Promise<FarmResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/farm/${farmId}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/farm/${farmId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -134,6 +133,7 @@ const updateFarmData = async ({
   deletedImagePublicIds: string[];
   newImages: File[];
 }) => {
+
   const formDataToSend = new FormData();
   formDataToSend.append("farmName", data.farmName.trim());
   formDataToSend.append("description", data.description.trim());
@@ -158,7 +158,7 @@ const updateFarmData = async ({
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/seller/farm/update/${farmId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/seller/farm/update/${farmId}`,
       {
         method: "PATCH",
         headers: {

@@ -242,10 +242,7 @@ export function CreateProductForm({
         toast.success(
           isEditing
             ? "Product updated successfully"
-            : "Product submitted for admin approval",
-          {
-            description: "Your product will be available after admin approval",
-          }
+            : "Product has been created successfully",
         );
         onSuccess();
         if (!isEditing) {

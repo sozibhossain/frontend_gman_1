@@ -30,7 +30,6 @@ const handler = NextAuth({
 
 
                 const user = result.data;
-                console.log("UUUUUUUUUUUUUUU",user)
 
           
                 return {
